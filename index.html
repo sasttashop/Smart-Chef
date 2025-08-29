@@ -1,3 +1,17 @@
+Akhter, samajh gaya — tum chahte ho ke **Smart Chef** me proper **Register → Login** system ho, jisme:
+
+- **Step 1:** User pehli baar **Register** kare (Name, Logo URL, Username, Password)  
+- **Step 2:** Data **LocalStorage** me save ho  
+- **Step 3:** Next time user **Login** kare same username & password se  
+- **Step 4:** Login hone ke baad uska naam, logo aur uski recipes load ho
+
+Main tumhe ek **ready-to-paste HTML+JS** code de raha hoon jo GitHub Pages par seedha kaam karega — bina server ke, sirf browser storage ka use karke.
+
+---
+
+## 📜 Full HTML Code
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,20 +48,29 @@
 
 <div class="container">
 
+  <!-- Register Form -->
+  <form id="registerForm">
+    <h3>Register</h3>
+    <input type="text" id="regName" placeholder="Your Chef Name" required>
+    <input type="url" id="regLogo" placeholder="Logo/Image URL" required>
+    <input type="text" id="regUsername" placeholder="Username" required>
+    <input type="password" id="regPassword" placeholder="Password" required>
+    <button type="submit">Register</button>
+  </form>
+
   <!-- Login Form -->
-  <form id="loginForm">
-    <h3>Login / Create Profile</h3>
-    <input type="text" id="loginName" placeholder="Your Chef Name" required>
-    <input type="url" id="loginLogo" placeholder="Logo/Image URL" required>
+  <form id="loginForm" style="display:none;">
+    <h3>Login</h3>
+    <input type="text" id="loginUsername" placeholder="Username" required>
+    <input type="password" id="loginPassword" placeholder="Password" required>
     <button type="submit">Login</button>
   </form>
 
   <!-- Main App -->
   <div id="app" style="display:none;">
     <div class="actions">
-      <button onclick="startVoiceSearch()">🎤 Voice Search</button>
-      <button onclick="aiSuggestion()">🤖 AI Suggestion</button>
-      <button onclick="startCooking()">🍳 Start Cooking</button>
+      <button onclick="startVoiceSearch()">🎤 Voice Search Recipe</button>
+      <button onclick="startVoiceAdd()">🎙️ Voice Add Recipe</button>
     </div>
 
     <!-- Add Recipe -->
@@ -72,30 +95,59 @@
 let currentUser = null;
 let recipes = [];
 
-// Load user session
-function loadSession() {
-  const savedUser = localStorage.getItem('currentUser');
-  if(savedUser) {
-    currentUser = JSON.parse(savedUser);
-    document.getElementById('chefName').textContent = currentUser.name;
-    document.getElementById('chefLogo').src = currentUser.logo;
-    recipes = JSON.parse(localStorage.getItem('recipes_'+currentUser.name)) || [];
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    renderRecipes();
+// Register
+document.getElementById('registerForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const name = document.getElementById('regName').value.trim();
+  const logo = document.getElementById('regLogo').value.trim();
+  const username = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value.trim();
+
+  if(localStorage.getItem('user_'+username)) {
+    alert('Username already exists!');
+    return;
   }
-}
+
+  const userData = { name, logo, username, password };
+  localStorage.setItem('user_'+username, JSON.stringify(userData));
+  alert('Registration successful! Please login.');
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'block';
+});
 
 // Login
 document.getElementById('loginForm').addEventListener('submit', function(e){
   e.preventDefault();
-  const name = document.getElementById('loginName').value.trim();
-  const logo = document.getElementById('loginLogo').value.trim();
-  currentUser = { name, logo };
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+
+  const storedUser = localStorage.getItem('user_'+username);
+  if(!storedUser) {
+    alert('User not found!');
+    return;
+  }
+
+  const userData = JSON.parse(storedUser);
+  if(userData.password !== password) {
+    alert('Incorrect password!');
+    return;
+  }
+
+  currentUser = userData;
   localStorage.setItem('currentUser', JSON.stringify(currentUser));
-  recipes = JSON.parse(localStorage.getItem('recipes_'+name)) || [];
-  loadSession();
+  recipes = JSON.parse(localStorage.getItem('recipes_'+username)) || [];
+  loadApp();
 });
+
+// Load App
+function loadApp() {
+  document.getElementById('chefName').textContent = currentUser.name;
+  document.getElementById('chefLogo').src = currentUser.logo;
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  renderRecipes();
+}
 
 // Logout
 function logoutUser() {
@@ -118,7 +170,7 @@ function renderRecipes() {
     `;
     list.appendChild(card);
   });
-  localStorage.setItem('recipes_'+currentUser.name, JSON.stringify(recipes));
+  localStorage.setItem('recipes_'+currentUser.username, JSON.stringify(recipes));
 }
 
 // Add recipe
@@ -149,28 +201,4 @@ function startVoiceSearch() {
   recognition.lang = 'en-US';
   recognition.start();
   recognition.onresult = function(event) {
-    const query = event.results[0][0].transcript.toLowerCase();
-    const found = recipes.filter(r => r.name.toLowerCase().includes(query));
-    if(found.length > 0) {
-      alert('Found: ' + found.map(r => r.name).join(', '));
-    } else {
-      alert('No recipe found for: ' + query);
-    }
-  };
-}
-
-// Dummy AI Suggestion
-function aiSuggestion() {
-  alert('🤖 AI suggestion feature coming soon!');
-}
-
-// Dummy Cooking Mode
-function startCooking() {
-  alert('🍳 Live cooking mode coming soon!');
-}
-
-loadSession();
-</script>
-
-</body>
-</html>
+    const query
