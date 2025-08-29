@@ -1,53 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@600&display=swap" rel="stylesheet">
-  <style>
-    .brand h1 {
-      font-family: 'Pacifico', cursive;
-      font-size: 40px;
-      font-weight: 600;
-      background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
-      display: inline-block;
-      margin: 0;
-    }
-    .cap-bounce {
-      position: absolute; 
-      top: -42px; 
-      left: 5px; 
-      width: 48px; 
-      height: 48px; 
-      transform: rotate(-15deg);
-      border: 2px solid gold; 
-      border-radius: 50%; 
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      background: white;
-      animation: bounce 1.5s ease;
-    }
-    @keyframes bounce {
-      0%   { transform: rotate(-15deg) translateY(-20px); }
-      50%  { transform: rotate(-15deg) translateY(5px); }
-      100% { transform: rotate(-15deg) translateY(0); }
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Smart Chef</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  body { font-family: 'Poppins', sans-serif; background: #fff8f8; margin:0; }
+  header { background: #fff; border-bottom: 2px solid #eee; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .brand h1 {
+    font-family: 'Pacifico', cursive;
+    font-size: 40px;
+    font-weight: 600;
+    background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+    display: inline-block;
+    margin: 0;
+  }
+  .cap-bounce {
+    position: absolute; 
+    top: -42px; 
+    left: 5px; 
+    width: 48px; 
+    height: 48px; 
+    transform: rotate(-15deg);
+    border: 2px solid gold; 
+    border-radius: 50%; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    background: white;
+    animation: bounce 1.5s ease;
+  }
+  @keyframes bounce {
+    0%   { transform: rotate(-15deg) translateY(-20px); }
+    50%  { transform: rotate(-15deg) translateY(5px); }
+    100% { transform: rotate(-15deg) translateY(0); }
+  }
+  .container { max-width: 800px; margin: auto; padding: 24px; }
+  form { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 24px; }
+  input, textarea { width: 100%; padding: 8px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; }
+  button { background: #e11d48; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+  .actions { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .recipe-card { background: white; border: 1px solid #eee; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+  .recipe-card h3 { margin: 0 0 8px; color: #e11d48; }
+</style>
 </head>
-
 <body>
-  <header>
-    <div class="brand" style="position: relative; display: inline-block;">
-      <h1 id="chefName">
-        Smart 
-        <span style="position:relative; display:inline-block;">
-          Chef
-          <!-- Cap Image -->
-          <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" 
-               alt="Chef Cap" 
-               class="cap-bounce">
-        </span>
-      </h1>
+
+<header>
+  <div class="brand" style="position: relative; display: inline-block;">
+    <h1 id="chefName">
+      Smart 
+      <span style="position:relative; display:inline-block;">
+        Chef
+        <!-- Cap Image -->
+        <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" 
+             alt="Chef Cap" 
+             class="cap-bounce">
+      </span>
+    </h1>
+  </div>
+  <button onclick="logoutUser()">Logout</button>
+</header>
+
+<div class="container">
+
+  <!-- Register Form -->
+  <form id="registerForm">
+    <h3>Register</h3>
+    <input type="text" id="regUsername" placeholder="Username" required>
+    <input type="password" id="regPassword" placeholder="Password" required>
+    <button type="submit">Register</button>
+  </form>
+
+  <!-- Login Form -->
+  <form id="loginForm" style="display:none;">
+    <h3>Login</h3>
+    <input type="text" id="loginUsername" placeholder="Username" required>
+    <input type="password" id="loginPassword" placeholder="Password" required>
+    <button type="submit">Login</button>
+
+    <!-- Google Sign-In -->
+    <div id="g_id_onload"
+         data-client_id="YOUR_GOOGLE_CLIENT_ID"
+         data-callback="handleGoogleLogin">
     </div>
-    <button onclick="logoutUser()">Logout</button>
-  </header>
+    <div class="g_id_signin" data-type="standard"></div>
+  </form>
+
+  <!-- Main App -->
+  <div id="app" style="display:none;">
+    <div class="actions">
+      <button onclick="startVoiceSearch()">🎤 Voice Search Recipe</button>
+      <button onclick="startVoiceAdd()">🎙️ Voice Add Recipe</button>
+    </div>
+
+    <!-- Add Recipe -->
+    <form id="recipeForm">
+      <h3>Add New Recipe</h3>
+      <input type="text" id="recipeName" placeholder="Recipe Name" required>
+      <input type="text" id="recipeIngredients" placeholder="Ingredients (comma separated)" required>
+      <textarea id="recipeSteps" placeholder="Steps (→ separated)" required></textarea>
+      <button type="submit">Add Recipe</button>
+    </form>
+
+    <!-- Recipe List -->
+    <div id="recipeList"></div>
+  </div>
+
+</div>
+
+<script>
+let currentUser = null;
+let recipes = [];
+
+// Register
+document.getElementById('registerForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const username = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value.trim();
+  if(localStorage.getItem('user_'+username)) {
+    alert('Username already exists!');
+    return;
+  }
+  localStorage.setItem('user_'+username, JSON.stringify({ username, password }));
+  alert('Registration successful! Please login.');
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'block';
+});
+
+// Login
+document.getElementById('loginForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  const storedUser = localStorage.getItem('user_'+username);
+  if(!storedUser) { alert('User not found!'); return; }
+  const userData = JSON.parse(storedUser);
+  if(userData.password !== password) { alert('Incorrect password!'); return; }
+  currentUser = { name: username, logo: '', username };
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  recipes = JSON.parse(localStorage.getItem('recipes_'+username)) || [];
+  loadApp();
+});
+
+// Google Login
+function handleGoogleLogin(response) {
+  const data = parseJwt(response.credential);
+  currentUser = { name: data.name, logo: data.picture, username: data.email };
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  recipes = JSON.parse(localStorage.getItem('recipes_'+currentUser.username)) || [];
+  loadApp();
+}
+function parseJwt(token) {
+  let base64Url = token.split('.')[1];
+  let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+  return JSON.parse(jsonPayload);
+}
+
+// Load App
+function loadApp() {
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  renderRecipes();
+}
+
+// Logout
+function logoutUser() {
+  localStorage.removeItem('currentUser');
+  location.reload();
+}
+
+// Render recipes
+function renderRecipes() {
+  const list = document.getElementById('recipeList');
+  list.innerHTML = '';
+  recipes.forEach((r, index) => {
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    card.innerHTML = `
+      <h3>${r.name}</h3>
+      <p><strong>Ingredients:</strong> ${r.ingredients}</p>
+      <p><strong>Steps:</strong> ${r.steps}</p>
+      <button onclick="deleteRecipe(${index})">❌ Delete</button>
+    `;
+    list.appendChild(card);
+  });
+  localStorage.setItem('recipes_'+currentUser.username, JSON.stringify(recipes));
+}
+
+// Add recipe
+document.getElementById('recipeForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const name = document.getElementById('recipeName').value.trim();
+  const ingredients = document.getElementById('recipeIngredients').value.trim();
+  const steps = document.getElementById('recipeSteps').value.trim();
+  recipes.push({ name, ingredients, steps });
+  renderRecipes();
+  this.reset();
+});
+
+// Delete recipe
+function deleteRecipe(index) {
+  recipes.splice(index, 1);
+  renderRecipes();
+}
+
+// Voice Search
+function startVoiceSearch() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Voice recognition not supported in this browser.');
+    return;
+  }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.start();
+  recognition.onresult = function(event) {
+    const query = event.results[0][0].transcript.toLowerCase();
+    const found = recipes.find(r => r.name.toLowerCase().includes(query));
+    if(found) {
+      alert("Recipe Found: " + found.name + "\nIngredients: " + found.ingredients + "\nSteps: " + found.steps);
+    } else {
+      alert("No recipe found for: " + query);
+    }
+  };
+}
+
+// Voice Add
+function startVoiceAdd() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Voice recognition not supported in this browser.');
+    return;
+  }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.start();
+  recognition.onresult = function(event) {
+    const speech = event.results[0][0].transcript;
+    const parts = speech.split("with");
+    const name = parts[0].trim();
+    const rest = parts[1] ? parts[1].trim() : "ingredients not clear";
+    recipes.push({ name, ingredients: rest, steps: "steps not specified" });
+    renderRecipes();
+    alert("Recipe Added: " + name);
+  };
+}
+</script>
+
 </body>
+</html>
