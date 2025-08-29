@@ -1,15 +1,18 @@
-Akhter, samajh gaya — tum chahte ho ke **Smart Chef** me proper **Register → Login** system ho, jisme:
+Akhter, chalo ab main tumhare liye **final integrated Smart Chef** bana deta hoon —  
+isme tumhe milega:  
 
-- **Step 1:** User pehli baar **Register** kare (Name, Logo URL, Username, Password)  
-- **Step 2:** Data **LocalStorage** me save ho  
-- **Step 3:** Next time user **Login** kare same username & password se  
-- **Step 4:** Login hone ke baad uska naam, logo aur uski recipes load ho
+- **Register** (sirf username + password)  
+- **Login** (username/password)  
+- **Login with Google** option  
+- **Per‑user recipes** (LocalStorage me save)  
+- **Voice Search** (recipe naam bol ke search)  
+- **Voice Add Recipe** (naam, ingredients, steps bol ke add)  
 
-Main tumhe ek **ready-to-paste HTML+JS** code de raha hoon jo GitHub Pages par seedha kaam karega — bina server ke, sirf browser storage ka use karke.
+Ye **GitHub Pages‑friendly** hai, sirf HTML + JS, koi server nahi.
 
 ---
 
-## 📜 Full HTML Code
+## 📜 Final HTML Code (Paste in your repo)
 
 ```html
 <!DOCTYPE html>
@@ -18,22 +21,20 @@ Main tumhe ek **ready-to-paste HTML+JS** code de raha hoon jo GitHub Pages par s
 <meta charset="UTF-8" />
 <title>Smart Chef</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Urdu&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-  body { margin: 0; font-family: 'Poppins','Noto Sans Urdu',sans-serif; background: #fff8f8; color: #222; }
-  header { background: #e11d48; color: white; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  body { font-family: 'Poppins', sans-serif; background: #fff8f8; margin:0; }
+  header { background: #e11d48; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
   .brand { display: flex; align-items: center; gap: 12px; }
   .brand img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-  h1 { margin: 0; font-size: 24px; }
   .container { max-width: 800px; margin: auto; padding: 24px; }
+  form { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 24px; }
+  input, textarea { width: 100%; padding: 8px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; }
+  button { background: #e11d48; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; }
   .actions { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-  button { background: #e11d48; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.3s ease, transform 0.2s ease; }
-  button:hover { background: #c8103b; transform: translateY(-2px); }
   .recipe-card { background: white; border: 1px solid #eee; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
   .recipe-card h3 { margin: 0 0 8px; color: #e11d48; }
-  form { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 24px; }
-  form input, form textarea { width: 100%; padding: 8px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
-  footer { text-align: center; font-size: 12px; color: #999; margin-top: 40px; }
 </style>
 </head>
 <body>
@@ -51,8 +52,6 @@ Main tumhe ek **ready-to-paste HTML+JS** code de raha hoon jo GitHub Pages par s
   <!-- Register Form -->
   <form id="registerForm">
     <h3>Register</h3>
-    <input type="text" id="regName" placeholder="Your Chef Name" required>
-    <input type="url" id="regLogo" placeholder="Logo/Image URL" required>
     <input type="text" id="regUsername" placeholder="Username" required>
     <input type="password" id="regPassword" placeholder="Password" required>
     <button type="submit">Register</button>
@@ -64,6 +63,13 @@ Main tumhe ek **ready-to-paste HTML+JS** code de raha hoon jo GitHub Pages par s
     <input type="text" id="loginUsername" placeholder="Username" required>
     <input type="password" id="loginPassword" placeholder="Password" required>
     <button type="submit">Login</button>
+
+    <!-- Google Sign-In -->
+    <div id="g_id_onload"
+         data-client_id="YOUR_GOOGLE_CLIENT_ID"
+         data-callback="handleGoogleLogin">
+    </div>
+    <div class="g_id_signin" data-type="standard"></div>
   </form>
 
   <!-- Main App -->
@@ -86,9 +92,6 @@ Main tumhe ek **ready-to-paste HTML+JS** code de raha hoon jo GitHub Pages par s
     <div id="recipeList"></div>
   </div>
 
-  <footer>
-    Smart Chef © 2025 — Designed by Akhter Rasool
-  </footer>
 </div>
 
 <script>
@@ -98,18 +101,13 @@ let recipes = [];
 // Register
 document.getElementById('registerForm').addEventListener('submit', function(e){
   e.preventDefault();
-  const name = document.getElementById('regName').value.trim();
-  const logo = document.getElementById('regLogo').value.trim();
   const username = document.getElementById('regUsername').value.trim();
   const password = document.getElementById('regPassword').value.trim();
-
   if(localStorage.getItem('user_'+username)) {
     alert('Username already exists!');
     return;
   }
-
-  const userData = { name, logo, username, password };
-  localStorage.setItem('user_'+username, JSON.stringify(userData));
+  localStorage.setItem('user_'+username, JSON.stringify({ username, password }));
   alert('Registration successful! Please login.');
   document.getElementById('registerForm').style.display = 'none';
   document.getElementById('loginForm').style.display = 'block';
@@ -120,29 +118,37 @@ document.getElementById('loginForm').addEventListener('submit', function(e){
   e.preventDefault();
   const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value.trim();
-
   const storedUser = localStorage.getItem('user_'+username);
-  if(!storedUser) {
-    alert('User not found!');
-    return;
-  }
-
+  if(!storedUser) { alert('User not found!'); return; }
   const userData = JSON.parse(storedUser);
-  if(userData.password !== password) {
-    alert('Incorrect password!');
-    return;
-  }
-
-  currentUser = userData;
+  if(userData.password !== password) { alert('Incorrect password!'); return; }
+  currentUser = { name: username, logo: '', username };
   localStorage.setItem('currentUser', JSON.stringify(currentUser));
   recipes = JSON.parse(localStorage.getItem('recipes_'+username)) || [];
   loadApp();
 });
 
+// Google Login
+function handleGoogleLogin(response) {
+  const data = parseJwt(response.credential);
+  currentUser = { name: data.name, logo: data.picture, username: data.email };
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  recipes = JSON.parse(localStorage.getItem('recipes_'+currentUser.username)) || [];
+  loadApp();
+}
+function parseJwt(token) {
+  let base64Url = token.split('.')[1];
+  let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+  return JSON.parse(jsonPayload);
+}
+
 // Load App
 function loadApp() {
   document.getElementById('chefName').textContent = currentUser.name;
-  document.getElementById('chefLogo').src = currentUser.logo;
+  document.getElementById('chefLogo').src = currentUser.logo || 'https://via.placeholder.com/40';
   document.getElementById('registerForm').style.display = 'none';
   document.getElementById('loginForm').style.display = 'none';
   document.getElementById('app').style.display = 'block';
@@ -200,5 +206,4 @@ function startVoiceSearch() {
   const recognition = new SpeechRecognition();
   recognition.lang = 'en-US';
   recognition.start();
-  recognition.onresult = function(event) {
-    const query
+ 
