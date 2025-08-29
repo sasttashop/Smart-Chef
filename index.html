@@ -89,6 +89,21 @@
       color: #999;
       margin-top: 40px;
     }
+    form {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+    }
+    form input, form textarea {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: inherit;
+    }
   </style>
 </head>
 <body>
@@ -104,28 +119,22 @@
 
 <div class="container">
   <div class="actions">
-    <button aria-label="Voice Search" onclick="startVoiceSearch()">🎤 Voice Search</button>
-    <button aria-label="AI Suggestion" onclick="aiSuggestion()">🤖 AI Suggestion</button>
-    <button aria-label="Start Cooking" onclick="startCooking()">🍳 Start Cooking</button>
+    <button onclick="startVoiceSearch()">🎤 Voice Search</button>
+    <button onclick="aiSuggestion()">🤖 AI Suggestion</button>
+    <button onclick="startCooking()">🍳 Start Cooking</button>
   </div>
 
-  <div class="recipe-card">
-    <h3>Chicken Biryani</h3>
-    <p><strong>Ingredients:</strong> Chicken, Rice, Spices, Onion</p>
-    <p><strong>Steps:</strong> Marinate → Cook → Layer → Steam</p>
-  </div>
+  <!-- Recipe Add Form -->
+  <form id="recipeForm">
+    <h3>Add New Recipe</h3>
+    <input type="text" id="recipeName" placeholder="Recipe Name" required>
+    <input type="text" id="recipeIngredients" placeholder="Ingredients (comma separated)" required>
+    <textarea id="recipeSteps" placeholder="Steps (→ separated)" required></textarea>
+    <button type="submit">Add Recipe</button>
+  </form>
 
-  <div class="recipe-card">
-    <h3>French Toast</h3>
-    <p><strong>Ingredients:</strong> Bread, Eggs, Milk, Sugar</p>
-    <p><strong>Steps:</strong> Mix → Dip → Fry → Serve</p>
-  </div>
-
-  <div class="recipe-card">
-    <h3>Vegetable Pulao</h3>
-    <p><strong>Ingredients:</strong> Rice, Carrots, Peas, Spices</p>
-    <p><strong>Steps:</strong> Sauté → Add Rice → Cook → Steam</p>
-  </div>
+  <!-- Recipe List -->
+  <div id="recipeList"></div>
 
   <footer>
     Smart Chef © 2025 — Designed by Akhter Rasool
@@ -133,6 +142,48 @@
 </div>
 
 <script>
+  // Load recipes from localStorage
+  let recipes = JSON.parse(localStorage.getItem('recipes')) || [
+    { name: "Chicken Biryani", ingredients: "Chicken, Rice, Spices, Onion", steps: "Marinate → Cook → Layer → Steam" },
+    { name: "French Toast", ingredients: "Bread, Eggs, Milk, Sugar", steps: "Mix → Dip → Fry → Serve" },
+    { name: "Vegetable Pulao", ingredients: "Rice, Carrots, Peas, Spices", steps: "Sauté → Add Rice → Cook → Steam" }
+  ];
+
+  function renderRecipes() {
+    const list = document.getElementById('recipeList');
+    list.innerHTML = '';
+    recipes.forEach((r, index) => {
+      const card = document.createElement('div');
+      card.className = 'recipe-card';
+      card.innerHTML = `
+        <h3>${r.name}</h3>
+        <p><strong>Ingredients:</strong> ${r.ingredients}</p>
+        <p><strong>Steps:</strong> ${r.steps}</p>
+        <button onclick="deleteRecipe(${index})">❌ Delete</button>
+      `;
+      list.appendChild(card);
+    });
+    localStorage.setItem('recipes', JSON.stringify(recipes));
+  }
+
+  function deleteRecipe(index) {
+    recipes.splice(index, 1);
+    renderRecipes();
+  }
+
+  document.getElementById('recipeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('recipeName').value.trim();
+    const ingredients = document.getElementById('recipeIngredients').value.trim();
+    const steps = document.getElementById('recipeSteps').value.trim();
+    if(name && ingredients && steps) {
+      recipes.push({ name, ingredients, steps });
+      renderRecipes();
+      this.reset();
+    }
+  });
+
+  // Dummy feature functions
   function startVoiceSearch() {
     alert('🎤 Voice search feature coming soon!');
   }
@@ -142,6 +193,9 @@
   function startCooking() {
     alert('🍳 Live cooking mode coming soon!');
   }
+
+  // Initial render
+  renderRecipes();
 </script>
 
 </body>
