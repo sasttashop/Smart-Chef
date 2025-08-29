@@ -8,21 +8,21 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   body { font-family: 'Poppins', sans-serif; background: #fff8f8; margin:0; }
-  header { background: #e11d48; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+  header { background: #e11d48; color: white; padding: 10px 16px; text-align:center; }
 
-  .brand { text-align:center; position: relative; }
   .brand h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 34px;
+    font-size: 28px;
     font-weight: 600;
     color: white;
     margin: 0;
     letter-spacing: 1px;
   }
   .chef-logo {
-    width: 50px;
-    height: 50px;
-    margin-bottom: 5px;
+    width: 40px;
+    height: 40px;
+    display: block;
+    margin: 0 auto 5px auto;
   }
 
   .container { max-width: 800px; margin: auto; padding: 24px; }
@@ -59,7 +59,6 @@
     <img src="https://cdn-icons-png.flaticon.com/512/1046/1046857.png" alt="Chef Cap Logo" class="chef-logo">
     <h1>Smart Chef</h1>
   </div>
-  <button onclick="logoutUser()">Logout</button>
 </header>
 
 <div class="container">
@@ -92,6 +91,7 @@
     <div class="actions">
       <button onclick="startVoiceSearch()">🎤 Voice Search Recipe</button>
       <button onclick="startVoiceAdd()">🎙️ Voice Add Recipe</button>
+      <button onclick="logoutUser()">🚪 Logout</button>
     </div>
 
     <!-- Add Recipe -->
@@ -110,7 +110,7 @@
 </div>
 
 <script>
-// Same JS logic for register, login, google login, recipes, voice
+// same JS logic for register, login, google login, recipes, voice
 </script>
 
 </body>
