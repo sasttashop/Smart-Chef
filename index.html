@@ -9,7 +9,6 @@
 <style>
   body { font-family: 'Poppins', sans-serif; background: #fff8f8; margin:0; }
   header { background: #e11d48; color: white; padding: 10px 16px; text-align:center; }
-
   .brand h1 {
     font-family: 'Playfair Display', serif;
     font-size: 28px;
@@ -26,17 +25,21 @@
   }
 
   .container { max-width: 800px; margin: auto; padding: 24px; }
-  form { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 24px; }
-  input, textarea { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; }
+  form { background: white; padding: 12px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 16px; }
+  form h3 { margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #e11d48; }
+  input, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+  .form-row { display: flex; gap: 10px; }
+  .form-row input { flex: 1; }
   button {
     background: #e11d48;
     color: white;
     border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
+    padding: 10px 16px;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
-    margin-top: 10px;
+    font-size: 14px;
+    margin-top: 8px;
     display: block;
     width: 100%;
     transition: 0.3s;
@@ -55,7 +58,6 @@
 
 <header>
   <div class="brand">
-    <!-- White Chef Cap Logo -->
     <img src="https://cdn-icons-png.flaticon.com/512/1046/1046857.png" alt="Chef Cap Logo" class="chef-logo">
     <h1>Smart Chef</h1>
   </div>
@@ -66,16 +68,20 @@
   <!-- Register Form -->
   <form id="registerForm">
     <h3>Register</h3>
-    <input type="text" id="regUsername" placeholder="Username" required>
-    <input type="password" id="regPassword" placeholder="Password" required>
+    <div class="form-row">
+      <input type="text" id="regUsername" placeholder="Username" required>
+      <input type="password" id="regPassword" placeholder="Password" required>
+    </div>
     <button type="submit">Register</button>
   </form>
 
   <!-- Login Form -->
-  <form id="loginForm" style="display:none;">
+  <form id="loginForm">
     <h3>Login</h3>
-    <input type="text" id="loginUsername" placeholder="Username" required>
-    <input type="password" id="loginPassword" placeholder="Password" required>
+    <div class="form-row">
+      <input type="text" id="loginUsername" placeholder="Username" required>
+      <input type="password" id="loginPassword" placeholder="Password" required>
+    </div>
     <button type="submit">Login</button>
 
     <!-- Google Sign-In -->
@@ -110,7 +116,144 @@
 </div>
 
 <script>
-// same JS logic for register, login, google login, recipes, voice
+let currentUser = null;
+let recipes = [];
+
+// Register
+document.getElementById('registerForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const username = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value.trim();
+  if(localStorage.getItem('user_'+username)) {
+    alert('Username already exists!');
+    return;
+  }
+  localStorage.setItem('user_'+username, JSON.stringify({ username, password }));
+  alert('Registration successful! Now login.');
+});
+
+// Login
+document.getElementById('loginForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  const storedUser = localStorage.getItem('user_'+username);
+  if(!storedUser) { alert('User not found!'); return; }
+  const userData = JSON.parse(storedUser);
+  if(userData.password !== password) { alert('Incorrect password!'); return; }
+  currentUser = { name: username, username };
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  recipes = JSON.parse(localStorage.getItem('recipes_'+username)) || [];
+  loadApp();
+});
+
+// Google Login
+function handleGoogleLogin(response) {
+  const data = parseJwt(response.credential);
+  currentUser = { name: data.name, username: data.email };
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  recipes = JSON.parse(localStorage.getItem('recipes_'+currentUser.username)) || [];
+  loadApp();
+}
+function parseJwt(token) {
+  let base64Url = token.split('.')[1];
+  let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+  return JSON.parse(jsonPayload);
+}
+
+// Load App
+function loadApp() {
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  renderRecipes();
+}
+
+// Logout
+function logoutUser() {
+  localStorage.removeItem('currentUser');
+  location.reload();
+}
+
+// Recipes
+function renderRecipes() {
+  const list = document.getElementById('recipeList');
+  list.innerHTML = '';
+  recipes.forEach((r, index) => {
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    card.innerHTML = `
+      <h3>${r.name}</h3>
+      <p><strong>Ingredients:</strong> ${r.ingredients}</p>
+      <p><strong>Steps:</strong> ${r.steps}</p>
+      <button onclick="deleteRecipe(${index})">❌ Delete</button>
+    `;
+    list.appendChild(card);
+  });
+  localStorage.setItem('recipes_'+currentUser.username, JSON.stringify(recipes));
+}
+
+// Add recipe
+document.getElementById('recipeForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const name = document.getElementById('recipeName').value.trim();
+  const ingredients = document.getElementById('recipeIngredients').value.trim();
+  const steps = document.getElementById('recipeSteps').value.trim();
+  recipes.push({ name, ingredients, steps });
+  renderRecipes();
+  this.reset();
+});
+
+// Delete recipe
+function deleteRecipe(index) {
+  recipes.splice(index, 1);
+  renderRecipes();
+}
+
+// Voice Search
+function startVoiceSearch() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Voice recognition not supported in this browser.');
+    return;
+  }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.start();
+  recognition.onresult = function(event) {
+    const query = event.results[0][0].transcript.toLowerCase();
+    const found = recipes.find(r => r.name.toLowerCase().includes(query));
+    if(found) alert(`Found Recipe: ${found.name}\nIngredients: ${found.ingredients}\nSteps: ${found.steps}`);
+    else alert("No matching recipe found!");
+  };
+}
+
+// Voice Add
+function startVoiceAdd() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Voice recognition not supported in this browser.');
+    return;
+  }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.start();
+  recognition.onresult = function(event) {
+    const spoken = event.results[0][0].transcript;
+    const parts = spoken.split(',');
+    if(parts.length >= 3) {
+      const [name, ingredients, steps] = parts;
+      recipes.push({ name: name.trim(), ingredients: ingredients.trim(), steps: steps.trim() });
+      renderRecipes();
+      alert("Recipe added by voice!");
+    } else {
+      alert("Please say: Recipe name, ingredients, steps");
+    }
+  };
+}
 </script>
 
 </body>
