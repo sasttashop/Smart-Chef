@@ -9,28 +9,43 @@
 <style>
   body { font-family: 'Poppins', sans-serif; background: #fff8f8; margin:0; }
   header { background: #e11d48; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
-  
+
+  .brand { text-align:center; position: relative; }
   .brand h1 {
     font-family: 'Playfair Display', serif;
     font-size: 34px;
     font-weight: 600;
     color: white;
-    letter-spacing: 1px;
     margin: 0;
-    position: relative;
+    letter-spacing: 1px;
   }
-  .cap-small {
-    position: absolute;
-    top: -30px; 
-    right: -20px;
-    width: 40px;
-    height: 40px;
-    transform: rotate(-10deg);
+  .chef-logo {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 5px;
   }
+
   .container { max-width: 800px; margin: auto; padding: 24px; }
   form { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 24px; }
   input, textarea { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; }
-  button { background: #e11d48; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 8px; display:block; }
+  button {
+    background: #e11d48;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 10px;
+    display: block;
+    width: 100%;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: #be123c;
+    transform: scale(1.03);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
   .actions { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
   .recipe-card { background: white; border: 1px solid #eee; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
   .recipe-card h3 { margin: 0 0 8px; color: #e11d48; }
@@ -39,13 +54,10 @@
 <body>
 
 <header>
-  <div class="brand" style="position: relative; display: inline-block;">
-    <h1>
-      Smart Chef
-      <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" 
-           alt="Chef Cap" 
-           class="cap-small">
-    </h1>
+  <div class="brand">
+    <!-- White Chef Cap Logo -->
+    <img src="https://cdn-icons-png.flaticon.com/512/1046/1046857.png" alt="Chef Cap Logo" class="chef-logo">
+    <h1>Smart Chef</h1>
   </div>
   <button onclick="logoutUser()">Logout</button>
 </header>
@@ -98,7 +110,7 @@
 </div>
 
 <script>
-// same JavaScript logic (register, login, google login, recipes, voice)
+// Same JS logic for register, login, google login, recipes, voice
 </script>
 
 </body>
