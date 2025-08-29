@@ -8,21 +8,25 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   body { font-family: 'Poppins', sans-serif; background: #fff8f8; margin:0; }
-  header { background: #e11d48; color: white; padding: 10px 16px; text-align:center; }
-  .brand h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 28px;
-    font-weight: 600;
-    color: white;
-    margin: 0;
-    letter-spacing: 1px;
+  header { background: #e11d48; color: white; padding: 10px 16px; text-align:center; position: relative; }
+  .brand h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; margin: 0; letter-spacing: 1px; }
+  .chef-logo { width: 40px; height: 40px; display: block; margin: 0 auto 5px auto; }
+
+  /* logout top right */
+  .logout-btn {
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    background: white;
+    color: #e11d48;
+    border: none;
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
   }
-  .chef-logo {
-    width: 40px;
-    height: 40px;
-    display: block;
-    margin: 0 auto 5px auto;
-  }
+  .logout-btn:hover { background: #fce7f3; }
 
   .container { max-width: 800px; margin: auto; padding: 24px; }
   form { background: white; padding: 12px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 16px; }
@@ -44,11 +48,19 @@
     width: 100%;
     transition: 0.3s;
   }
-  button:hover {
-    background: #be123c;
-    transform: scale(1.03);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  button:hover { background: #be123c; transform: scale(1.03); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+  /* user box */
+  .user-box {
+    border: 2px solid gold;
+    background: white;
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 20px;
   }
+
   .actions { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
   .recipe-card { background: white; border: 1px solid #eee; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
   .recipe-card h3 { margin: 0 0 8px; color: #e11d48; }
@@ -61,6 +73,7 @@
     <img src="https://cdn-icons-png.flaticon.com/512/1046/1046857.png" alt="Chef Cap Logo" class="chef-logo">
     <h1>Smart Chef</h1>
   </div>
+  <button class="logout-btn" onclick="logoutUser()" style="display:none;">Logout</button>
 </header>
 
 <div class="container">
@@ -83,21 +96,19 @@
       <input type="password" id="loginPassword" placeholder="Password" required>
     </div>
     <button type="submit">Login</button>
-
-    <!-- Google Sign-In -->
-    <div id="g_id_onload"
-         data-client_id="YOUR_GOOGLE_CLIENT_ID"
-         data-callback="handleGoogleLogin">
-    </div>
-    <div class="g_id_signin" data-type="standard"></div>
   </form>
 
   <!-- Main App -->
   <div id="app" style="display:none;">
+
+    <!-- user info -->
+    <div class="user-box">
+      👨‍🍳 Logged in as: <span id="loggedUser"></span>
+    </div>
+
     <div class="actions">
       <button onclick="startVoiceSearch()">🎤 Voice Search Recipe</button>
       <button onclick="startVoiceAdd()">🎙️ Voice Add Recipe</button>
-      <button onclick="logoutUser()">🚪 Logout</button>
     </div>
 
     <!-- Add Recipe -->
@@ -147,28 +158,13 @@ document.getElementById('loginForm').addEventListener('submit', function(e){
   loadApp();
 });
 
-// Google Login
-function handleGoogleLogin(response) {
-  const data = parseJwt(response.credential);
-  currentUser = { name: data.name, username: data.email };
-  localStorage.setItem('currentUser', JSON.stringify(currentUser));
-  recipes = JSON.parse(localStorage.getItem('recipes_'+currentUser.username)) || [];
-  loadApp();
-}
-function parseJwt(token) {
-  let base64Url = token.split('.')[1];
-  let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(''));
-  return JSON.parse(jsonPayload);
-}
-
 // Load App
 function loadApp() {
   document.getElementById('registerForm').style.display = 'none';
   document.getElementById('loginForm').style.display = 'none';
   document.getElementById('app').style.display = 'block';
+  document.querySelector('.logout-btn').style.display = 'block';
+  document.getElementById('loggedUser').textContent = currentUser.name;
   renderRecipes();
 }
 
