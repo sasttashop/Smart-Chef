@@ -8,9 +8,6 @@
   <style>
     body.light-mode { background:#fff8f8; color:#111; }
     body.dark-mode { background:#111; color:#eee; }
-    body.dark-mode header { background:#333; }
-    body.dark-mode form, body.dark-mode .recipe-card { background:#222; color:#eee; border-color:#444; }
-    header { background:#e11d48; color:white; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; }
     .recipe-card { background:white; border:1px solid #eee; border-radius:10px; padding:12px; margin-top:12px; }
     .recipe-card h3 { color:#e11d48; font-weight:bold; }
     button { background:#e11d48; color:white; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600; }
@@ -20,15 +17,13 @@
 <body class="light-mode">
 
   <!-- Header -->
-  <header>
-    <div class="flex items-center gap-2">
-      👨‍🍳 <h1 class="font-bold text-lg">Smart Chef</h1>
-    </div>
-    <button id="logoutBtn" onclick="logoutUser()" style="font-size:14px; padding:4px 10px;">Logout</button>
+  <header class="bg-red-600 text-white text-center p-4 text-xl font-bold">
+    👨‍🍳 Smart Chef
   </header>
 
   <!-- Main Container -->
   <div class="max-w-lg mx-auto p-4">
+
     <!-- Register Form -->
     <form id="registerForm" class="bg-white shadow-md rounded p-4 mt-6">
       <h2 class="text-xl font-bold mb-2">Register</h2>
@@ -59,7 +54,11 @@
 
     <!-- Main App -->
     <div id="app" class="hidden">
-      <h2 class="text-lg font-bold mt-4">Welcome, <span id="userName"></span> 🎉</h2>
+      <!-- User Info + Logout -->
+      <div class="flex justify-between items-center bg-white shadow p-3 rounded mt-4">
+        <span class="font-bold text-red-600" id="userName"></span>
+        <button id="logoutBtn" onclick="logoutUser()" style="font-size:14px; padding:4px 10px;">Logout</button>
+      </div>
 
       <!-- Add Recipe -->
       <form id="recipeForm" class="bg-white shadow-md rounded p-4 mt-6">
