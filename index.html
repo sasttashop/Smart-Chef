@@ -18,7 +18,15 @@
     <input type="password" id="loginPassword" placeholder="Password" required />
     <button type="submit">Login</button>
     <button type="button" onclick="UI.showRegister()">Go to Register</button>
-  </form>
+  </form><form id="recipeForm">
+  <h3>نئی ترکیب شامل کریں</h3>
+  <input type="text" id="recipeName" placeholder="ترکیب کا نام" required />
+  <input type="text" id="recipeIngredients" placeholder="اجزاء (comma-separated)" required />
+  <textarea id="recipeSteps" placeholder="ترکیب کے مراحل (→ سے الگ کریں)" required></textarea>
+  <button type="submit">شامل کریں</button>
+</form>
+
+<div id="recipeList"></div>
 
   <div id="app" style="display:none;">
     <h3>Welcome, <span id="loggedUser"></span></h3>
