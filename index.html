@@ -1,97 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Smart Chef</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#e11d48" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <title>Smart Chef Login</title>
 </head>
 <body>
+  <form id="registerForm">
+    <h3>Register</h3>
+    <input type="text" id="regUsername" placeholder="Username" required />
+    <input type="password" id="regPassword" placeholder="Password" required />
+    <button type="submit">Register</button>
+    <button type="button" onclick="UI.showLogin()">Go to Login</button>
+  </form>
 
-  <header>
-    <div class="brand">
-      <img id="chefLogo" src="icon-192.png" alt="Chef Logo">
-      <h1>Smart Chef</h1>
-    </div>
-    <div class="header-actions">
-      <button onclick="toggleTheme()">🌓</button>
-      <button class="logout-btn" onclick="logoutUser()">⏻</button>
-    </div>
-  </header>
+  <form id="loginForm" style="display:none;">
+    <h3>Login</h3>
+    <input type="text" id="loginUsername" placeholder="Username" required />
+    <input type="password" id="loginPassword" placeholder="Password" required />
+    <button type="submit">Login</button>
+    <button type="button" onclick="UI.showRegister()">Go to Register</button>
+  </form>
 
-  <main>
-    <!-- Register Form -->
-    <form id="registerForm">
-      <h3>Register</h3>
-      <label>Username</label>
-      <input type="text" id="regUsername" required>
-      <label>Password</label>
-      <input type="password" id="regPassword" required>
-      <button type="submit">Register</button>
-      <div class="form-switch">
-        Already registered? <button type="button" onclick="showLogin()">Login</button>
-      </div>
-    </form>
-
-    <!-- Login Form -->
-    <form id="loginForm" style="display:none;">
-      <h3>Login</h3>
-      <label>Username</label>
-      <input type="text" id="loginUsername" required>
-      <label>Password</label>
-      <input type="password" id="loginPassword" required>
-      <button type="submit">Login</button>
-      <div class="form-switch">
-        New user? <button type="button" onclick="showRegister()">Register</button>
-      </div>
-    </form>
-
-    <!-- App UI -->
-    <section id="app" style="display:none;">
-      <div class="user-box">Welcome, <span id="loggedUser"></span></div>
-
-      <input id="searchInput" type="text" placeholder="Search recipes…">
-
-      <div class="actions">
-        <button onclick="startVoiceSearch()">🎤 Voice Search</button>
-        <button onclick="startVoiceAdd()">🎙️ Voice Add</button>
-      </div>
-
-      <form id="recipeForm">
-        <h3>Add New Recipe</h3>
-        <label>Name</label>
-        <input type="text" id="recipeName" required>
-        <label>Ingredients (comma-separated)</label>
-        <input type="text" id="recipeIngredients" required>
-        <label>Steps (→ separated)</label>
-        <textarea id="recipeSteps" required></textarea>
-        <button type="submit">Add Recipe</button>
-      </form>
-
-      <div id="recipeList"></div>
-    </section>
-  </main>
-
-  <!-- Modal -->
-  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal">
-      <p id="modalText">Are you sure?</p>
-      <button class="confirm" onclick="confirmAction()">Yes</button>
-      <button class="cancel" onclick="closeModal()">No</button>
-    </div>
+  <div id="app" style="display:none;">
+    <h3>Welcome, <span id="loggedUser"></span></h3>
+    <button onclick="UI.logout()">Logout</button>
   </div>
 
   <script src="script.js"></script>
-  <script>
-    // Service Worker Registration
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js").then(() => {
-        console.log("✅ Service Worker Registered");
-      });
-    }
-  </script>
 </body>
 </html>
