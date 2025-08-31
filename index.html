@@ -1,160 +1,464 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Smart Chef - Recipe Manager</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root { --brand:#e11d48; --brand-dark:#be123c; }
+    body.light-mode { background:#fff8f8; color:#111; font-family:sans-serif; margin:0; }
+    body.dark-mode  { background:#111; color:#eee; font-family:sans-serif; margin:0; }
+    header { background:var(--brand); color:#fff; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; }
+    header h1 { margin:0; font-size:20px; display:flex; align-items:center; gap:8px; }
+    header .right { display:flex; align-items:center; gap:8px; }
+    header .iconbtn { background:transparent; border:none; color:#fff; font-size:18px; cursor:pointer; }
+    .wrap { max-width:920px; margin:16px auto; padding:0 12px; }
+    form, .card, .panel { background:#fff; padding:12px; border-radius:8px; margin:12px 0; border:1px solid #eee; }
+    body.dark-mode form, body.dark-mode .card, body.dark-mode .panel { background:#222; border-color:#444; }
+    input, select, textarea { width:100%; padding:8px; margin:6px 0; border:1px solid #ccc; border-radius:6px; background:#fff; color:#111; }
+    body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background:#1a1a1a; color:#eee; border-color:#444; }
+    button { background:var(--brand); color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:600; }
+    button:hover { background:var(--brand-dark); }
+    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    .col { flex:1 1 300px; }
+    .recipe-card { padding:12px; border:1px solid #ddd; border-radius:8px; margin:10px 0; background:#fff; }
+    body.dark-mode .recipe-card { background:#222; border-color:#444; }
+    .recipe-card h3 { margin:0 0 6px; color:var(--brand); }
+    .muted { opacity:.8; font-size:12px; }
+    .ai-box { background:#fce7f3; border:1px solid var(--brand); }
+    body.dark-mode .ai-box { background:#3a1d29; }
+    .step-box { background:#fff3cd; }
+    body.dark-mode .step-box { background:#3b3420; }
+    .list-item { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px dashed #ddd; }
+    body.dark-mode .list-item { border-color:#444; }
+    .list-item s { opacity:.7; }
+    .planner-grid { overflow:auto; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { border:1px solid #ddd; padding:6px; text-align:left; }
+    body.dark-mode th, body.dark-mode td { border-color:#444; }
+    th { background:#ffe1ea; }
+    body.dark-mode th { background:#2a1f23; }
+    .tag { display:inline-block; padding:2px 8px; border-radius:999px; background:#eee; font-size:12px; }
+    body.dark-mode .tag { background:#333; }
+  </style>
 </head>
-<body class="bg-rose-50 min-h-screen flex flex-col items-center justify-start font-sans">
+<body>
 
-  <!-- Header -->
-  <header class="w-full bg-rose-600 text-white py-4 text-center shadow-md">
-    <div class="flex flex-col items-center">
-      <img src="https://cdn-icons-png.flaticon.com/512/1046/1046857.png" class="w-12 h-12 mb-1" alt="Chef Cap">
-      <h1 class="text-2xl font-bold tracking-wide">Smart Chef</h1>
-    </div>
-  </header>
+<header>
+  <h1>👨‍🍳 Smart Chef</h1>
+  <div class="right">
+    <button class="iconbtn" title="Theme" onclick="toggleTheme()">🌙</button>
+  </div>
+</header>
 
-  <main class="w-full max-w-md mt-6 p-4">
-
-    <!-- Register Form -->
-    <form id="registerForm" class="bg-white p-4 rounded-lg shadow mb-4">
-      <h2 class="text-lg font-semibold text-rose-600 mb-2">Register</h2>
-      <div class="flex gap-2 mb-2">
-        <input type="text" id="regUsername" placeholder="Username" class="flex-1 border rounded px-2 py-1" required>
-        <input type="password" id="regPassword" placeholder="Password" class="flex-1 border rounded px-2 py-1" required>
-      </div>
-      <button type="submit" class="w-full bg-rose-600 text-white py-2 rounded hover:bg-rose-700">Register</button>
+<div class="wrap" id="auth">
+  <div class="row">
+    <form id="registerForm" class="col">
+      <h3>Register</h3>
+      <input type="text" id="regUser" placeholder="Username" required />
+      <input type="password" id="regPass" placeholder="Password" required />
+      <button type="submit">Create Account</button>
     </form>
 
-    <!-- Login Form -->
-    <form id="loginForm" class="bg-white p-4 rounded-lg shadow mb-4 hidden">
-      <h2 class="text-lg font-semibold text-rose-600 mb-2">Login</h2>
-      <div class="flex gap-2 mb-2">
-        <input type="text" id="loginUsername" placeholder="Username" class="flex-1 border rounded px-2 py-1" required>
-        <input type="password" id="loginPassword" placeholder="Password" class="flex-1 border rounded px-2 py-1" required>
-      </div>
-      <button type="submit" class="w-full bg-rose-600 text-white py-2 rounded hover:bg-rose-700">Login</button>
+    <form id="loginForm" class="col">
+      <h3>Login</h3>
+      <input type="text" id="loginUser" placeholder="Username" required />
+      <input type="password" id="loginPass" placeholder="Password" required />
+      <button type="submit">Login</button>
     </form>
+  </div>
+</div>
 
-    <!-- App -->
-    <div id="app" class="hidden relative">
-
-      <!-- Logout button -->
-      <button onclick="logoutUser()" class="absolute -top-3 -left-3 bg-rose-600 text-white w-8 h-8 rounded-full text-sm hover:bg-rose-700">⏻</button>
-
-      <!-- User Info -->
-      <div class="border-2 border-yellow-400 bg-white p-2 rounded text-center font-semibold text-rose-600 mb-4">
-        <span id="loggedUser"></span>
+<div class="wrap" id="app" style="display:none;">
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <div class="row" style="align-items:center; justify-content:space-between;">
+          <div><span class="tag">User</span> <strong id="currentUser"></strong></div>
+          <div class="row" style="gap:6px;">
+            <input id="searchBox" placeholder="Search recipes..." />
+            <button onclick="startVoiceSearch()">🎤</button>
+            <button onclick="logoutUser()">Logout</button>
+          </div>
+        </div>
       </div>
 
-      <!-- Add Recipe -->
-      <form id="recipeForm" class="bg-white p-4 rounded-lg shadow mb-4">
-        <h2 class="text-lg font-semibold text-rose-600 mb-2">Add Recipe</h2>
-        <input type="text" id="recipeName" placeholder="Recipe Name" class="w-full border rounded px-2 py-1 mb-2" required>
-        <input type="text" id="recipeIngredients" placeholder="Ingredients (comma separated)" class="w-full border rounded px-2 py-1 mb-2" required>
-        <textarea id="recipeSteps" placeholder="Steps" class="w-full border rounded px-2 py-1 mb-2"></textarea>
-        <button type="submit" class="w-full bg-rose-600 text-white py-2 rounded hover:bg-rose-700">Add</button>
+      <form id="recipeForm">
+        <h3>Add Recipe</h3>
+        <div class="row">
+          <div class="col"><input type="text" id="recipeName" placeholder="Recipe Name" required /></div>
+          <div class="col">
+            <select id="recipeCategory" required>
+              <option value="Breakfast">Breakfast</option>
+              <option value="Lunch">Lunch</option>
+              <option value="Dinner">Dinner</option>
+              <option value="Dessert">Dessert</option>
+            </select>
+          </div>
+        </div>
+        <textarea id="recipeIngredients" placeholder="Ingredients (comma separated e.g. 2 eggs, 1 cup milk, sugar)" required></textarea>
+        <textarea id="recipeSteps" placeholder="Steps (use → between steps)" required></textarea>
+        <button type="submit">Add Recipe</button>
       </form>
 
-      <!-- Recipe List -->
-      <div id="recipeList"></div>
+      <div class="ai-box panel">
+        <h3>🤖 AI Recipe Suggestions</h3>
+        <div class="row">
+          <input id="aiInput" placeholder="Enter an ingredient (e.g. chicken, potato, rice)" />
+          <button onclick="aiSuggest()">Suggest</button>
+        </div>
+        <div id="aiResult" class="muted" style="margin-top:6px;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="row" style="justify-content:space-between; align-items:center;">
+          <h3 style="margin:0;">Your Recipes</h3>
+          <div>
+            <button onclick="generateShoppingList()">🛒 Shopping List</button>
+            <button onclick="openPlanner()">📅 Meal Planner</button>
+          </div>
+        </div>
+        <div id="recipeList"></div>
+      </div>
     </div>
 
-  </main>
+    <div class="col">
+      <!-- Shopping List -->
+      <div class="panel" id="shoppingPanel" style="display:none;">
+        <h3>🛒 Shopping List</h3>
+        <div id="shoppingList"></div>
+        <div class="row">
+          <button onclick="clearBought()">Clear Bought</button>
+          <button onclick="exportList()">Export TXT</button>
+        </div>
+        <p class="muted">Tip: آئٹمز پر چیک لگا کر “خرید لیا” مارک کریں، ایپ یاد رکھے گی۔</p>
+      </div>
 
-  <script>
-    let currentUser = null;
-    let recipes = [];
+      <!-- Weekly Meal Planner -->
+      <div class="panel" id="plannerPanel" style="display:none;">
+        <h3>📅 Weekly Meal Planner</h3>
+        <div class="planner-grid" id="plannerGrid"></div>
+        <p class="muted">ہر سیل میں recipe منتخب کریں، سب کچھ خودکار طور پر محفوظ ہو جائے گا۔</p>
+      </div>
 
-    // Register
-    document.getElementById('registerForm').addEventListener('submit', e => {
-      e.preventDefault();
-      const username = regUsername.value.trim();
-      const password = regPassword.value.trim();
-      if(localStorage.getItem('user_'+username)) return alert('User exists!');
-      localStorage.setItem('user_'+username, JSON.stringify({username, password}));
-      alert('Registered! Please login.');
-      registerForm.classList.add('hidden');
-      loginForm.classList.remove('hidden');
+      <!-- Cooking Mode -->
+      <div class="step-box" id="cookingBox" style="display:none;">
+        <h3>🍳 Cooking Mode</h3>
+        <p id="currentStep"></p>
+        <div class="row">
+          <button onclick="prevStep()">⬅️ Previous</button>
+          <button onclick="nextStep()">➡️ Next</button>
+          <button onclick="repeatStep()">🔁 Repeat</button>
+          <button onclick="startVoiceCooking()">🎙️ Voice</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== State ===== */
+let users = JSON.parse(localStorage.getItem("users")||"{}");
+let recipes = JSON.parse(localStorage.getItem("recipes")||"{}"); // {username: [ {name,category,ingredients[],steps[],favorite} ]}
+let shopping = JSON.parse(localStorage.getItem("shopping")||"{}"); // {username: [{name,bought}]}
+let mealPlan = JSON.parse(localStorage.getItem("mealPlan")||"{}"); // {username:{day:{meal:recipeName}}}
+let currentUser = localStorage.getItem("currentUser") || null;
+
+let cookingSteps = []; let stepIndex = 0;
+const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const MEALS = ["Breakfast","Lunch","Dinner"];
+
+/* ===== Theme ===== */
+(function initTheme(){
+  let theme = localStorage.getItem("theme") || "light";
+  document.body.classList.add(theme+"-mode");
+})();
+function toggleTheme(){
+  if(document.body.classList.contains("dark-mode")){
+    document.body.classList.remove("dark-mode");
+    document.body.classList.add("light-mode");
+    localStorage.setItem("theme","light");
+  } else {
+    document.body.classList.remove("light-mode");
+    document.body.classList.add("dark-mode");
+    localStorage.setItem("theme","dark");
+  }
+}
+
+/* ===== Auth ===== */
+document.getElementById("registerForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const u = regUser.value.trim(), p = regPass.value.trim();
+  if(!u || !p) return;
+  if(users[u]) return alert("User already exists.");
+  users[u] = { password:p };
+  localStorage.setItem("users", JSON.stringify(users));
+  alert("Registered! Please login.");
+});
+
+document.getElementById("loginForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const u = loginUser.value.trim(), p = loginPass.value.trim();
+  if(!users[u] || users[u].password !== p) return alert("Invalid credentials!");
+  currentUser = u;
+  localStorage.setItem("currentUser", u);
+  recipes[u] = recipes[u] || [];
+  shopping[u] = shopping[u] || [];
+  mealPlan[u] = mealPlan[u] || {};
+  enterApp();
+});
+
+if(currentUser && users[currentUser]){
+  recipes[currentUser] = recipes[currentUser] || [];
+  shopping[currentUser] = shopping[currentUser] || [];
+  mealPlan[currentUser] = mealPlan[currentUser] || {};
+  enterApp();
+}
+
+function enterApp(){
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("currentUser").innerText = currentUser;
+  renderRecipes();
+  renderShoppingList(); // keep panel content fresh if opened
+  buildPlannerGrid();   // build UI once
+}
+
+/* ===== Recipes ===== */
+document.getElementById("recipeForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const name = recipeName.value.trim();
+  const category = recipeCategory.value;
+  const ingredients = recipeIngredients.value.split(",").map(s=>s.trim()).filter(Boolean);
+  const steps = recipeSteps.value.split("→").map(s=>s.trim()).filter(Boolean);
+  recipes[currentUser].push({ name, category, ingredients, steps, favorite:false });
+  localStorage.setItem("recipes", JSON.stringify(recipes));
+  recipeForm.reset();
+  renderRecipes();
+  // اگر پلانر کھلا ہوا ہے تو لسٹیں تازہ کریں
+  buildPlannerGrid(true);
+});
+
+function renderRecipes(){
+  const q = (document.getElementById("searchBox")?.value || "").toLowerCase();
+  const list = document.getElementById("recipeList");
+  list.innerHTML = "";
+  (recipes[currentUser]||[])
+    .filter(r => r.name.toLowerCase().includes(q))
+    .forEach((r,i)=>{
+      const card = document.createElement("div");
+      card.className = "recipe-card";
+      card.innerHTML = `
+        <h3>${r.name} ${r.favorite ? "❤️" : ""}</h3>
+        <p><strong>Category:</strong> ${r.category}</p>
+        <p class="muted">${r.ingredients.join(", ")||"No ingredients"}</p>
+        <div class="row">
+          <button onclick="startCooking(${i})">👨‍🍳 Cook</button>
+          <button onclick="toggleFav(${i})">${r.favorite ? "💖 Unfavorite" : "🤍 Favorite"}</button>
+          <button onclick="addIngredientsToList(${i})">➕ Add Ingredients</button>
+          <button onclick="shareRecipe(${i})">🔗 Share</button>
+        </div>
+      `;
+      list.appendChild(card);
     });
+  localStorage.setItem("recipes", JSON.stringify(recipes));
+}
 
-    // Login
-    document.getElementById('loginForm').addEventListener('submit', e => {
-      e.preventDefault();
-      const username = loginUsername.value.trim();
-      const password = loginPassword.value.trim();
-      const stored = localStorage.getItem('user_'+username);
-      if(!stored) return alert('Not found!');
-      const user = JSON.parse(stored);
-      if(user.password !== password) return alert('Wrong password!');
-      currentUser = { name: username };
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-      recipes = JSON.parse(localStorage.getItem('recipes_'+username)) || [];
-      loadApp();
+function toggleFav(i){
+  recipes[currentUser][i].favorite = !recipes[currentUser][i].favorite;
+  localStorage.setItem("recipes", JSON.stringify(recipes));
+  renderRecipes();
+}
+
+/* ===== Search + Voice ===== */
+document.getElementById("searchBox").addEventListener("input", renderRecipes);
+function startVoiceSearch(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return alert("Voice not supported in this browser.");
+  const rec = new SR(); rec.lang="en-US"; rec.start();
+  rec.onresult = e => {
+    document.getElementById("searchBox").value = e.results[0][0].transcript;
+    renderRecipes();
+  };
+}
+
+/* ===== AI Suggestions (basic local) ===== */
+function aiSuggest(){
+  const ing = (aiInput.value||"").toLowerCase();
+  let out = [];
+  if(ing.includes("chicken")) out = ["Chicken Curry","Grilled Chicken","Chicken Biryani"];
+  else if(ing.includes("potato")) out = ["Aloo Paratha","Mashed Potatoes","Fries"];
+  else if(ing.includes("rice")) out = ["Biryani","Fried Rice","Kheer"];
+  else out = ["Try: Veggie Omelette","Pasta Salad","Mixed Stir Fry"];
+  aiResult.innerHTML = out.map(s=>`🍽️ ${s}`).join("<br>");
+}
+
+/* ===== Cooking Mode + Voice ===== */
+function startCooking(i){
+  cookingSteps = recipes[currentUser][i].steps;
+  stepIndex = 0;
+  document.getElementById("cookingBox").style.display = "block";
+  showStep();
+}
+function showStep(){ document.getElementById("currentStep").innerText = cookingSteps[stepIndex] || "Done!"; }
+function nextStep(){ if(stepIndex < cookingSteps.length-1) stepIndex++; showStep(); }
+function prevStep(){ if(stepIndex > 0) stepIndex--; showStep(); }
+function repeatStep(){ showStep(); }
+
+function startVoiceCooking(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return alert("Voice not supported.");
+  const rec = new SR(); rec.lang="en-US"; rec.continuous=true; rec.start();
+  rec.onresult = e => {
+    const txt = e.results[e.results.length-1][0].transcript.toLowerCase();
+    if(txt.includes("next")) nextStep();
+    else if(txt.includes("previous")) prevStep();
+    else if(txt.includes("repeat")) repeatStep();
+  };
+}
+
+/* ===== Shopping List ===== */
+function generateShoppingList(){
+  // Aggregate all ingredients across recipes (unique, case-insensitive)
+  const set = new Map(); // key: lowercased item, val: display text
+  (recipes[currentUser]||[]).forEach(r=>{
+    (r.ingredients||[]).forEach(it=>{
+      const k = it.trim().toLowerCase();
+      if(!k) return;
+      if(!set.has(k)) set.set(k, it.trim());
     });
+  });
+  // Merge with existing (keep bought flags)
+  shopping[currentUser] = shopping[currentUser] || [];
+  const boughtMap = new Map(shopping[currentUser].map(x=>[x.name.toLowerCase(), x.bought]));
+  shopping[currentUser] = Array.from(set.values()).map(v=>({ name:v, bought: boughtMap.get(v.toLowerCase())||false }));
+  localStorage.setItem("shopping", JSON.stringify(shopping));
+  document.getElementById("shoppingPanel").style.display = "block";
+  renderShoppingList();
+}
 
-    // Load App
-    function loadApp(){
-      registerForm.classList.add('hidden');
-      loginForm.classList.add('hidden');
-      app.classList.remove('hidden');
-      loggedUser.textContent = currentUser.name;
-      renderRecipes();
-    }
+function renderShoppingList(){
+  const box = document.getElementById("shoppingList");
+  if(!box) return;
+  box.innerHTML = "";
+  (shopping[currentUser]||[]).forEach((item, idx)=>{
+    const row = document.createElement("div");
+    row.className = "list-item";
+    const id = "chk_"+idx;
+    row.innerHTML = `
+      <input id="${id}" type="checkbox" ${item.bought?"checked":""} />
+      ${item.bought ? `<s>${item.name}</s>` : `<span>${item.name}</span>`}
+      <button style="margin-left:auto" onclick="removeListItem(${idx})">🗑️</button>
+    `;
+    box.appendChild(row);
+    row.querySelector("#"+id).addEventListener("change", (e)=>{
+      shopping[currentUser][idx].bought = e.target.checked;
+      localStorage.setItem("shopping", JSON.stringify(shopping));
+      renderShoppingList();
+    });
+  });
+}
 
-    // Logout
-    function logoutUser(){
-      localStorage.removeItem('currentUser');
-      location.reload();
-    }
+function addIngredientsToList(i){
+  // Add ingredients of a single recipe (merge)
+  const items = (recipes[currentUser][i].ingredients||[]).map(s=>s.trim()).filter(Boolean);
+  const cur = shopping[currentUser] = shopping[currentUser] || [];
+  const present = new Set(cur.map(x=>x.name.toLowerCase()));
+  items.forEach(it=>{
+    if(!present.has(it.toLowerCase())) cur.push({name:it, bought:false});
+  });
+  localStorage.setItem("shopping", JSON.stringify(shopping));
+  document.getElementById("shoppingPanel").style.display = "block";
+  renderShoppingList();
+}
 
-    // Add Recipe
-    recipeForm.addEventListener('submit', e=>{
-      e.preventDefault();
-      recipes.push({
-        name: recipeName.value,
-        ingredients: recipeIngredients.value,
-        steps: recipeSteps.value
+function removeListItem(idx){
+  shopping[currentUser].splice(idx,1);
+  localStorage.setItem("shopping", JSON.stringify(shopping));
+  renderShoppingList();
+}
+
+function clearBought(){
+  shopping[currentUser] = (shopping[currentUser]||[]).filter(x=>!x.bought);
+  localStorage.setItem("shopping", JSON.stringify(shopping));
+  renderShoppingList();
+}
+
+function exportList(){
+  const lines = (shopping[currentUser]||[]).map(x=>`${x.bought?"[x]":"[ ]"} ${x.name}`);
+  const blob = new Blob([lines.join("\n")], {type:"text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "shopping-list.txt"; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ===== Meal Planner ===== */
+function openPlanner(){
+  document.getElementById("plannerPanel").style.display = "block";
+  buildPlannerGrid(true);
+}
+function buildPlannerGrid(refreshOptions=false){
+  const grid = document.getElementById("plannerGrid");
+  if(!grid) return;
+  const userPlan = mealPlan[currentUser] = mealPlan[currentUser] || {};
+  const userRecipes = recipes[currentUser]||[];
+
+  // Build table
+  let html = `<table><thead><tr><th>Day</th>${MEALS.map(m=>`<th>${m}</th>`).join("")}</tr></thead><tbody>`;
+  DAYS.forEach(day=>{
+    html += `<tr><th>${day}</th>`;
+    MEALS.forEach(meal=>{
+      const selId = `sel_${day}_${meal}`;
+      html += `<td><select id="${selId}"><option value="">— Select —</option>${
+        userRecipes.map(r=>`<option ${ (userPlan[day]?.[meal]===r.name)?"selected":""}>${r.name}</option>`).join("")
+      }</select></td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table>`;
+  grid.innerHTML = html;
+
+  // Attach listeners
+  DAYS.forEach(day=>{
+    MEALS.forEach(meal=>{
+      const sel = document.getElementById(`sel_${day}_${meal}`);
+      sel.addEventListener("change", ()=>{
+        userPlan[day] = userPlan[day] || {};
+        userPlan[day][meal] = sel.value || "";
+        mealPlan[currentUser] = userPlan;
+        localStorage.setItem("mealPlan", JSON.stringify(mealPlan));
       });
-      renderRecipes();
-      localStorage.setItem('recipes_'+currentUser.name, JSON.stringify(recipes));
-      recipeForm.reset();
     });
+  });
+}
 
-    // Render
-    function renderRecipes(){
-      recipeList.innerHTML = '';
-      recipes.forEach((r,i)=>{
-        const div = document.createElement('div');
-        div.className="bg-white p-4 rounded-lg shadow mb-3";
-        div.innerHTML = `
-          <h3 class="text-rose-600 font-bold">${r.name}</h3>
-          <p><strong>Ingredients:</strong> ${r.ingredients}</p>
-          <p><strong>Steps:</strong> ${r.steps}</p>
-          <button onclick="deleteRecipe(${i})" class="mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
-        `;
-        recipeList.appendChild(div);
-      });
-    }
+/* ===== Share (simple) ===== */
+function shareRecipe(i){
+  const data = recipes[currentUser][i];
+  const payload = encodeURIComponent(btoa(JSON.stringify(data)));
+  const link = `${location.origin}${location.pathname}?share=${payload}`;
+  navigator.clipboard.writeText(link).then(()=>alert("Share link copied!"));
+}
 
-    // Delete
-    function deleteRecipe(i){
-      recipes.splice(i,1);
-      renderRecipes();
-      localStorage.setItem('recipes_'+currentUser.name, JSON.stringify(recipes));
-    }
+/* ===== Public Share View ===== */
+(function checkShare(){
+  const sp = new URLSearchParams(location.search);
+  if(sp.has("share")){
+    const obj = JSON.parse(atob(decodeURIComponent(sp.get("share"))));
+    document.body.innerHTML = `
+      <header><h1>🍴 Shared Recipe</h1></header>
+      <div class="wrap">
+        <div class="recipe-card">
+          <h3>${obj.name}</h3>
+          <p><strong>Category:</strong> ${obj.category}</p>
+          <p><strong>Ingredients:</strong> ${obj.ingredients.join(", ")}</p>
+          <p><strong>Steps:</strong> ${obj.steps.join(" → ")}</p>
+        </div>
+      </div>`;
+  }
+})();
 
-    // Auto Login if session exists
-    window.onload = () => {
-      const saved = localStorage.getItem('currentUser');
-      if(saved){
-        currentUser = JSON.parse(saved);
-        recipes = JSON.parse(localStorage.getItem('recipes_'+currentUser.name)) || [];
-        loadApp();
-      }
-    }
-  </script>
+</script>
 </body>
 </html>
