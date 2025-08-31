@@ -22,7 +22,6 @@
     👨‍🍳 Smart Chef
   </header>
 
-  <!-- Container -->
   <div class="max-w-lg mx-auto p-4">
 
     <!-- Tabs -->
@@ -54,12 +53,20 @@
         <button id="logoutBtn" onclick="logoutUser()" style="font-size:14px; padding:4px 10px;">Logout</button>
       </div>
 
+      <!-- Voice Search -->
+      <div class="mt-4 flex items-center gap-2">
+        <input type="text" id="searchInput" placeholder="Search recipe..." class="flex-grow border p-2 rounded" />
+        <button onclick="startVoiceSearch()">🎤 Voice Search</button>
+      </div>
+
+      <!-- Add Recipe -->
       <form id="recipeForm" class="bg-white shadow-md rounded p-4 mt-6">
-        <h3 class="font-semibold mb-2">Add Recipe</h3>
+        <h3 class="font-semibold mb-2">Add / Edit Recipe</h3>
         <input type="text" id="recipeName" placeholder="Recipe Name" class="w-full border p-2 mb-2 rounded" required>
         <input type="text" id="recipeIngredients" placeholder="Ingredients (comma separated)" class="w-full border p-2 mb-2 rounded" required>
         <textarea id="recipeSteps" placeholder="Steps (→ separated)" class="w-full border p-2 mb-2 rounded" required></textarea>
-        <button type="submit">Add Recipe</button>
+        <input type="hidden" id="editIndex" value="">
+        <button type="submit">Save Recipe</button>
       </form>
 
       <div id="recipeList" class="mt-6"></div>
@@ -95,7 +102,7 @@ document.getElementById('registerForm').addEventListener('submit', function(e){
   }
   localStorage.setItem('user_'+username, JSON.stringify({ username, password }));
   alert('Registration successful! Please login.');
-  document.getElementById('tabLogin').click(); // switch to login
+  document.getElementById('tabLogin').click();
 });
 
 // Login
@@ -130,7 +137,7 @@ function logoutUser() {
   location.reload();
 }
 
-// Recipes render
+// Render Recipes
 function renderRecipes() {
   const list = document.getElementById('recipeList');
   list.innerHTML = '';
@@ -141,6 +148,7 @@ function renderRecipes() {
       <h3>${r.name}</h3>
       <p><strong>Ingredients:</strong> ${r.ingredients}</p>
       <p><strong>Steps:</strong> ${r.steps}</p>
+      <button onclick="editRecipe(${index})">✏️ Edit</button>
       <button onclick="deleteRecipe(${index})">❌ Delete</button>
     `;
     list.appendChild(card);
@@ -148,32 +156,79 @@ function renderRecipes() {
   localStorage.setItem('recipes_'+currentUser.username, JSON.stringify(recipes));
 }
 
-// Add recipe
+// Add or Edit Recipe
 document.getElementById('recipeForm').addEventListener('submit', function(e){
   e.preventDefault();
   const name = document.getElementById('recipeName').value.trim();
   const ingredients = document.getElementById('recipeIngredients').value.trim();
   const steps = document.getElementById('recipeSteps').value.trim();
-  recipes.push({ name, ingredients, steps });
+  const editIndex = document.getElementById('editIndex').value;
+
+  if(editIndex === "") {
+    recipes.push({ name, ingredients, steps });
+  } else {
+    recipes[editIndex] = { name, ingredients, steps };
+    document.getElementById('editIndex').value = "";
+  }
+
   renderRecipes();
   this.reset();
 });
 
-// Delete recipe
+// Edit Recipe
+function editRecipe(index) {
+  const r = recipes[index];
+  document.getElementById('recipeName').value = r.name;
+  document.getElementById('recipeIngredients').value = r.ingredients;
+  document.getElementById('recipeSteps').value = r.steps;
+  document.getElementById('editIndex').value = index;
+}
+
+// Delete Recipe
 function deleteRecipe(index) {
   recipes.splice(index, 1);
   renderRecipes();
 }
 
-// Auto-login check
-(function(){
-  let savedUser = localStorage.getItem('currentUser');
-  if(savedUser){
-    currentUser = JSON.parse(savedUser);
-    recipes = JSON.parse(localStorage.getItem('recipes_'+currentUser.username)) || [];
-    loadApp();
+// Voice Search
+function startVoiceSearch() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Voice recognition not supported.');
+    return;
   }
-})();
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.start();
+
+  recognition.onresult = function(event) {
+    const query = event.results[0][0].transcript.toLowerCase();
+    document.getElementById('searchInput').value = query;
+    searchRecipe(query);
+  };
+}
+
+// Search Recipe
+document.getElementById('searchInput').addEventListener('input', function() {
+  searchRecipe(this.value.toLowerCase());
+});
+
+function searchRecipe(query) {
+  const list = document.getElementById('recipeList');
+  list.innerHTML = '';
+  recipes.filter(r => r.name.toLowerCase().includes(query)).forEach((r, index) => {
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    card.innerHTML = `
+      <h3>${r.name}</h3>
+      <p><strong>Ingredients:</strong> ${r.ingredients}</p>
+      <p><strong>Steps:</strong> ${r.steps}</p>
+      <button onclick="editRecipe(${index})">✏️ Edit</button>
+      <button onclick="deleteRecipe(${index})">❌ Delete</button>
+    `;
+    list.appendChild(card);
+  });
+}
 </script>
 </body>
 </html>
