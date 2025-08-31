@@ -2,42 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Smart Chef - Recipe Manager</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#e11d48">
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Poppins', sans-serif; background: #fff8f8; margin:0; }
-    header { background: #e11d48; color: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
-    header h1 { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-    header h1 img { width: 36px; height: 36px; }
-    .container { max-width: 800px; margin: auto; padding: 16px; }
-    form { background: white; padding: 16px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    input, textarea { width: 100%; padding: 8px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; }
-    button { background: #e11d48; color: white; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-    button:hover { background: #b50d35; }
-    .recipe-card { background: white; border: 1px solid #eee; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
-    .recipe-card h3 { color: #e11d48; margin:0 0 6px; }
-    .topbar { display: flex; justify-content: space-between; align-items: center; }
-  </style>
+  <title>Smart Chef</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#e11d48" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <header>
-    <h1>
-      <img src="icon-192.png" alt="Chef Logo"> Smart Chef
-    </h1>
+    <div class="brand">
+      <img id="chefLogo" src="icon-192.png" alt="Chef Logo">
+      <h1>Smart Chef</h1>
+    </div>
+    <div class="header-actions">
+      <button onclick="toggleTheme()">🌓</button>
+      <button class="logout-btn" onclick="logoutUser()">⏻</button>
+    </div>
   </header>
 
-  <div class="container">
-
-    <!-- Register -->
+  <main>
+    <!-- Register Form -->
     <form id="registerForm">
       <h3>Register</h3>
       <label>Username</label>
@@ -45,9 +31,12 @@
       <label>Password</label>
       <input type="password" id="regPassword" required>
       <button type="submit">Register</button>
+      <div class="form-switch">
+        Already registered? <button type="button" onclick="showLogin()">Login</button>
+      </div>
     </form>
 
-    <!-- Login -->
+    <!-- Login Form -->
     <form id="loginForm" style="display:none;">
       <h3>Login</h3>
       <label>Username</label>
@@ -55,116 +44,53 @@
       <label>Password</label>
       <input type="password" id="loginPassword" required>
       <button type="submit">Login</button>
+      <div class="form-switch">
+        New user? <button type="button" onclick="showRegister()">Register</button>
+      </div>
     </form>
 
-    <!-- App -->
-    <div id="app" style="display:none;">
-      <div class="topbar">
-        <p id="userName"></p>
-        <button id="logoutBtn">Logout</button>
+    <!-- App UI -->
+    <section id="app" style="display:none;">
+      <div class="user-box">Welcome, <span id="loggedUser"></span></div>
+
+      <input id="searchInput" type="text" placeholder="Search recipes…">
+
+      <div class="actions">
+        <button onclick="startVoiceSearch()">🎤 Voice Search</button>
+        <button onclick="startVoiceAdd()">🎙️ Voice Add</button>
       </div>
 
-      <!-- Add Recipe -->
       <form id="recipeForm">
-        <h3>Add Recipe</h3>
-        <input type="text" id="recipeName" placeholder="Recipe Name" required>
-        <input type="text" id="recipeIngredients" placeholder="Ingredients (comma separated)" required>
-        <textarea id="recipeSteps" placeholder="Steps (-> separated)" required></textarea>
-        <button type="submit">Add</button>
+        <h3>Add New Recipe</h3>
+        <label>Name</label>
+        <input type="text" id="recipeName" required>
+        <label>Ingredients (comma-separated)</label>
+        <input type="text" id="recipeIngredients" required>
+        <label>Steps (→ separated)</label>
+        <textarea id="recipeSteps" required></textarea>
+        <button type="submit">Add Recipe</button>
       </form>
 
-      <!-- Recipe List -->
       <div id="recipeList"></div>
-    </div>
+    </section>
+  </main>
 
+  <!-- Modal -->
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <p id="modalText">Are you sure?</p>
+      <button class="confirm" onclick="confirmAction()">Yes</button>
+      <button class="cancel" onclick="closeModal()">No</button>
+    </div>
   </div>
 
+  <script src="script.js"></script>
   <script>
-    let currentUser = null;
-    let recipes = [];
-
-    // Register
-    document.getElementById('registerForm').addEventListener('submit', e=>{
-      e.preventDefault();
-      const u = regUsername.value.trim();
-      const p = regPassword.value.trim();
-      if(localStorage.getItem('user_'+u)){ alert('User exists!'); return; }
-      localStorage.setItem('user_'+u, JSON.stringify({username:u,password:p}));
-      alert('Registered! Now login.');
-      registerForm.style.display="none";
-      loginForm.style.display="block";
-    });
-
-    // Login
-    document.getElementById('loginForm').addEventListener('submit', e=>{
-      e.preventDefault();
-      const u = loginUsername.value.trim();
-      const p = loginPassword.value.trim();
-      const user = JSON.parse(localStorage.getItem('user_'+u)||'null');
-      if(!user){ alert('Not found'); return;}
-      if(user.password!==p){ alert('Wrong password'); return;}
-      currentUser = u;
-      recipes = JSON.parse(localStorage.getItem('recipes_'+u)||'[]');
-      loadApp();
-    });
-
-    // Load App
-    function loadApp(){
-      userName.textContent = currentUser;
-      registerForm.style.display="none";
-      loginForm.style.display="none";
-      app.style.display="block";
-      renderRecipes();
-    }
-
-    // Logout
-    document.getElementById('logoutBtn').onclick=()=>{
-      currentUser=null;
-      app.style.display="none";
-      loginForm.style.display="block";
-    }
-
-    // Add recipe
-    document.getElementById('recipeForm').addEventListener('submit', e=>{
-      e.preventDefault();
-      recipes.push({name:recipeName.value, ingredients:recipeIngredients.value, steps:recipeSteps.value});
-      localStorage.setItem('recipes_'+currentUser, JSON.stringify(recipes));
-      renderRecipes();
-      recipeForm.reset();
-    });
-
-    // Render recipes
-    function renderRecipes(){
-      recipeList.innerHTML='';
-      recipes.forEach((r,i)=>{
-        recipeList.innerHTML+=`
-          <div class="recipe-card">
-            <h3>${r.name}</h3>
-            <p><b>Ingredients:</b> ${r.ingredients}</p>
-            <p><b>Steps:</b> ${r.steps}</p>
-            <button onclick="editRecipe(${i})">✏️ Edit</button>
-            <button onclick="deleteRecipe(${i})">❌ Delete</button>
-          </div>`;
+    // Service Worker Registration
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").then(() => {
+        console.log("✅ Service Worker Registered");
       });
-    }
-
-    function deleteRecipe(i){
-      recipes.splice(i,1);
-      localStorage.setItem('recipes_'+currentUser, JSON.stringify(recipes));
-      renderRecipes();
-    }
-
-    function editRecipe(i){
-      const r=recipes[i];
-      recipeName.value=r.name;
-      recipeIngredients.value=r.ingredients;
-      recipeSteps.value=r.steps;
-      deleteRecipe(i);
-    }
-
-    // Service Worker
-    if("serviceWorker" in navigator){
-      navigator.serviceWorker.register("service-worker.js");
     }
   </script>
 </body>
