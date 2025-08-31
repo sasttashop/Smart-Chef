@@ -1,38 +1,60 @@
 <!DOCTYPE html>
-<html>
-<head><link rel="stylesheet" href="style.css" />
+<html lang="ur">
+<head>
+  <meta charset="UTF-8" />
   <title>Smart Chef Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <form id="registerForm">
-    <h3>Register</h3>
-    <input type="text" id="regUsername" placeholder="Username" required />
-    <input type="password" id="regPassword" placeholder="Password" required />
-    <button type="submit">Register</button>
-    <button type="button" onclick="UI.showLogin()">Go to Login</button>
-  </form>
 
-  <form id="loginForm" style="display:none;">
-    <h3>Login</h3>
-    <input type="text" id="loginUsername" placeholder="Username" required />
-    <input type="password" id="loginPassword" placeholder="Password" required />
-    <button type="submit">Login</button>
-    <button type="button" onclick="UI.showRegister()">Go to Register</button>
-  </form><form id="recipeForm">
-  <h3>نئی ترکیب شامل کریں</h3>
-  <input type="text" id="recipeName" placeholder="ترکیب کا نام" required />
-  <input type="text" id="recipeIngredients" placeholder="اجزاء (comma-separated)" required />
-  <textarea id="recipeSteps" placeholder="ترکیب کے مراحل (→ سے الگ کریں)" required></textarea>
-  <button type="submit">شامل کریں</button>
-</form>
+  <header>
+    <h1>👨‍🍳 Smart Chef</h1>
+  </header>
 
-<div id="recipeList"></div>
+  <main>
+    <!-- رجسٹریشن فارم -->
+    <form id="registerForm">
+      <h3>رجسٹر کریں</h3>
+      <input type="text" id="regUsername" placeholder="یوزر نیم" required />
+      <input type="password" id="regPassword" placeholder="پاسورڈ" required />
+      <button type="submit">رجسٹر</button>
+      <div class="form-switch">
+        پہلے سے رجسٹرڈ ہیں؟ <button type="button" onclick="UI.showLogin()">لاگ ان کریں</button>
+      </div>
+    </form>
 
-  <div id="app" style="display:none;">
-    <h3>Welcome, <span id="loggedUser"></span></h3>
-    <button onclick="UI.logout()">Logout</button>
-  </div>
+    <!-- لاگ ان فارم -->
+    <form id="loginForm" style="display:none;">
+      <h3>لاگ ان کریں</h3>
+      <input type="text" id="loginUsername" placeholder="یوزر نیم" required />
+      <input type="password" id="loginPassword" placeholder="پاسورڈ" required />
+      <button type="submit">لاگ ان</button>
+      <div class="form-switch">
+        نئے یوزر ہیں؟ <button type="button" onclick="UI.showRegister()">رجسٹر کریں</button>
+      </div>
+    </form>
 
+    <!-- ایپ سیکشن -->
+    <section id="app" style="display:none;">
+      <h3>خوش آمدید، <span id="loggedUser"></span>!</h3>
+      <button onclick="UI.logout()">🔒 لاگ آؤٹ</button>
+
+      <!-- ترکیب فارم -->
+      <form id="recipeForm">
+        <h3>نئی ترکیب شامل کریں</h3>
+        <input type="text" id="recipeName" placeholder="ترکیب کا نام" required />
+        <input type="text" id="recipeIngredients" placeholder="اجزاء (comma-separated)" required />
+        <textarea id="recipeSteps" placeholder="ترکیب کے مراحل (→ سے الگ کریں)" required></textarea>
+        <button type="submit">شامل کریں</button>
+      </form>
+
+      <!-- ترکیب لسٹ -->
+      <div id="recipeList"></div>
+    </section>
+  </main>
+
+  <!-- JavaScript file must load after all HTML -->
   <script src="script.js"></script>
 </body>
 </html>
