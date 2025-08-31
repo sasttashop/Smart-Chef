@@ -1,13 +1,20 @@
 const Recipe = {
   add: (e) => {
     e.preventDefault();
+
     const name = Form.get("recipeName");
     const ingredients = Form.get("recipeIngredients");
     const steps = Form.get("recipeSteps");
 
+    if (!name || !ingredients || !steps) {
+      Alert.show("⚠️ تمام فیلڈز بھرنا ضروری ہیں");
+      return;
+    }
+
     const recipe = { name, ingredients, steps };
     const all = Recipe.getAll();
     all.push(recipe);
+
     localStorage.setItem("recipes", JSON.stringify(all));
     Recipe.render();
     Alert.show("✅ ترکیب شامل ہو گئی");
@@ -15,14 +22,19 @@ const Recipe = {
   },
 
   getAll: () => {
-    return JSON.parse(localStorage.getItem("recipes") || "[]");
+    try {
+      return JSON.parse(localStorage.getItem("recipes")) || [];
+    } catch (err) {
+      console.error("❌ Recipe parsing error:", err);
+      return [];
+    }
   },
 
   render: () => {
     const list = document.getElementById("recipeList");
     list.innerHTML = "";
-    const recipes = Recipe.getAll();
 
+    const recipes = Recipe.getAll();
     if (recipes.length === 0) {
       list.innerHTML = "<p>کوئی ترکیب موجود نہیں</p>";
       return;
@@ -42,4 +54,8 @@ const Recipe = {
 };
 
 // Event Binding
-document.getElementById("recipeForm").addEventListener("submit", Recipe.add);
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("recipeForm");
+  if (form) form.addEventListener("submit", Recipe.add);
+  Recipe.render();
+});
