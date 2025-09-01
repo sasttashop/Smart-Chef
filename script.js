@@ -11,6 +11,7 @@ const UI = {
     document.getElementById("app").style.display = "none";
   },
   showApp: (username) => {
+    console.log("✅ Logged in as:", username);
     document.getElementById("loggedUser").textContent = username;
     document.getElementById("loginForm").style.display = "none";
     document.getElementById("registerForm").style.display = "none";
@@ -45,6 +46,10 @@ const Auth = {
     }
 
     localStorage.setItem(username, password);
+
+    console.log("📝 Registered:", username);
+    console.log("📝 Saved password:", localStorage.getItem(username));
+
     Alert.show("✅ رجسٹریشن مکمل");
     UI.showLogin();
   },
@@ -55,10 +60,17 @@ const Auth = {
     const password = document.getElementById("loginPassword").value.trim();
 
     const stored = localStorage.getItem(username);
+
+    console.log("🔐 Login username:", username);
+    console.log("🔐 Entered password:", password);
+    console.log("🔐 Stored password:", stored);
+
     if (stored && stored === password) {
+      Alert.show("✅ لاگ ان کامیاب");
       UI.showApp(username);
     } else {
       Alert.show("❌ یوزر نیم یا پاسورڈ غلط ہے");
+      console.warn("Login failed for:", username);
     }
   }
 };
@@ -77,61 +89,4 @@ const Recipe = {
       return;
     }
 
-    const recipe = { name, ingredients, steps };
-    const all = Recipe.getAll();
-    all.push(recipe);
-
-    localStorage.setItem("recipes", JSON.stringify(all));
-    Recipe.render();
-    Alert.show("✅ ترکیب شامل ہو گئی");
-    e.target.reset();
-  },
-
-  getAll: () => {
-    try {
-      return JSON.parse(localStorage.getItem("recipes")) || [];
-    } catch (err) {
-      console.error("❌ Recipe parsing error:", err);
-      return [];
-    }
-  },
-
-  render: () => {
-    const list = document.getElementById("recipeList");
-    list.innerHTML = "";
-
-    const recipes = Recipe.getAll();
-    if (recipes.length === 0) {
-      list.innerHTML = "<p>کوئی ترکیب موجود نہیں</p>";
-      return;
-    }
-
-    recipes.forEach((r) => {
-      const div = document.createElement("div");
-      div.className = "recipe-card";
-      div.innerHTML = `
-        <h4>${r.name}</h4>
-        <p><strong>اجزاء:</strong> ${r.ingredients}</p>
-        <p><strong>مراحل:</strong> ${r.steps}</p>
-      `;
-      list.appendChild(div);
-    });
-  }
-};
-
-// === Event Binding ===
-document.addEventListener("DOMContentLoaded", () => {
-  const regForm = document.getElementById("registerForm");
-  const loginForm = document.getElementById("loginForm");
-  const recipeForm = document.getElementById("recipeForm");
-  const goToLoginBtn = document.getElementById("goToLoginBtn");
-  const goToRegisterBtn = document.getElementById("goToRegisterBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
-
-  if (regForm) regForm.addEventListener("submit", Auth.register);
-  if (loginForm) loginForm.addEventListener("submit", Auth.login);
-  if (recipeForm) recipeForm.addEventListener("submit", Recipe.add);
-  if (goToLoginBtn) goToLoginBtn.addEventListener("click", UI.showLogin);
-  if (goToRegisterBtn) goToRegisterBtn.addEventListener("click", UI.showRegister);
-  if (logoutBtn) logoutBtn.addEventListener("click", UI.logout);
-});
+    const
