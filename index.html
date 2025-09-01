@@ -20,7 +20,7 @@
       <input type="password" id="regPassword" placeholder="پاسورڈ" required />
       <button type="submit">رجسٹر</button>
       <div class="form-switch">
-        پہلے سے رجسٹرڈ ہیں؟ <button type="button" onclick="UI.showLogin()">لاگ ان کریں</button>
+        پہلے سے رجسٹرڈ ہیں؟ <button type="button" id="goToLoginBtn">لاگ ان کریں</button>
       </div>
     </form>
 
@@ -31,14 +31,14 @@
       <input type="password" id="loginPassword" placeholder="پاسورڈ" required />
       <button type="submit">لاگ ان</button>
       <div class="form-switch">
-        نئے یوزر ہیں؟ <button type="button" onclick="UI.showRegister()">رجسٹر کریں</button>
+        نئے یوزر ہیں؟ <button type="button" id="goToRegisterBtn">رجسٹر کریں</button>
       </div>
     </form>
 
     <!-- ایپ سیکشن -->
     <section id="app" style="display:none;">
       <h3>خوش آمدید، <span id="loggedUser"></span>!</h3>
-      <button onclick="UI.logout()">🔒 لاگ آؤٹ</button>
+      <button id="logoutBtn">🔒 لاگ آؤٹ</button>
 
       <!-- ترکیب فارم -->
       <form id="recipeForm">
@@ -54,7 +54,6 @@
     </section>
   </main>
 
-  <!-- JavaScript file must load after all HTML -->
   <script src="script.js"></script>
 </body>
 </html>
